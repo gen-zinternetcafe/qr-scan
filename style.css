@@ -21,7 +21,7 @@ body {
     color: #ffffff;
 
     /* ✅ SINGLE HD BACKGROUND ONLY */
-    background-image: url("https://scontent.fceb6-4.fna.fbcdn.net/v/t39.30808-6/616156731_853066730692094_5569832347747413606_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeHRcIjKruHV8nwnERmNsNzt_pn-Mi4PLo3-mf4yLg8ujQhpHv8pBhEcatUb_ZNM7i8ebfY4_VQaOF9Oq4TR0koQ&_nc_ohc=8ATrfNM0l2IQ7kNvwHs72P0&_nc_oc=AdkaIMcqF49BuTK8oSnybF2Yo39r77HtmJMVxXbDUB_vWKDvz5a2bn5XDkJOYIxtmp8&_nc_zt=23&_nc_ht=scontent.fceb6-4.fna&_nc_gid=VULrHk_sxyix2uNmNK5W8w&oh=00_AfrwY69GBw1a5Y-RYDifMD5ToYF9ql39VxEHzJkBKUsHqg&oe=6972E1C8");
+    background-image: url("backstylegenz.jpg");
 
     background-repeat: no-repeat;
     background-position: center center;
@@ -153,3 +153,4 @@ body {
         transform: translateY(-5px);
     }
 }
+
