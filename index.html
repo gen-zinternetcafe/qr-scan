@@ -38,6 +38,7 @@
     <!-- Logo -->
     <div class="logo-container"></div>
 
+    <!-- ✅ KEEP THIS LINE INTACT -->
     <h2 id="message">Checking QR Code...</h2>
 
     <script>
@@ -105,32 +106,26 @@
     const footer = document.getElementById('footer');
     const messages = [
         "© 2026 Gen - Z Internet Cafe. All Rights Reserved.",
-        `<span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Call Us :</span> <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">+907-014-2659  |</span> 
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">ZIP :</span> <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">6128</span><br>
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Address :</span> <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.</span>`
+        `<span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Call Us :</span> 
+         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">+907-014-2659  |</span> 
+         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">ZIP :</span> 
+         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">6128</span><br>
+         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Address :</span> 
+         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">
+         Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.</span>`
     ];
     let current = 0;
 
     function loopFooter() {
-        // Fade out
         footer.style.opacity = 0;
-
         setTimeout(() => {
-            // Switch message
             current = (current + 1) % messages.length;
-
-            // Update text (use innerHTML for styling)
             footer.innerHTML = messages[current];
-
-            // Fade in
             footer.style.opacity = 1;
-        }, 1000); // match the CSS transition duration
+        }, 1000);
     }
 
-    // Initial fade-in
     setTimeout(() => footer.style.opacity = 1, 500);
-
-    // Loop every 5 seconds
     setInterval(loopFooter, 5000);
     </script>
 </body>
