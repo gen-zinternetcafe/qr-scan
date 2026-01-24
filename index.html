@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> QR Scan</title>
+    <title>QR Scan</title>
 
     <!-- Link external CSS -->
     <link rel="stylesheet" href="style.css">
@@ -11,146 +11,137 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <!-- Add Google Fonts -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Roboto+Flex:ital,wght@1,300&display=swap" rel="stylesheet">
 
     <style>
-    footer {
-        position: fixed;
-        bottom: 10px;
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        color: #555;
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-    }
-    body {
-        font-family: Arial, sans-serif;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+        }
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Background Music -->
+    <audio id="bgMusic" loop autoplay muted>
+        <source src="Backgroundmusic.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const bgMusic = document.getElementById('bgMusic');
+
+        // Attempt to play audio programmatically
+        bgMusic.play().catch(() => console.log('Autoplay blocked, waiting for interaction.'));
+
+        // Listen for first user interaction to unmute
+        document.addEventListener('click', () => {
+            bgMusic.muted = false;
+            bgMusic.play();
+        }, { once: true });
+    </script>
+
     <!-- Logo -->
     <div class="logo-container"></div>
 
-    <!-- ✅ THIS SHOWS FIRST -->
+    <!-- Message -->
     <h2 id="message">Checking QR Code...</h2>
 
-    <!-- ✅ DEVICE LIMIT SCRIPT (ADDED, NOT REMOVING ANYTHING) -->
+    <!-- Firebase Configuration & QR Scan Logic -->
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
+            authDomain: "genz-qr.firebaseapp.com",
+            projectId: "genz-qr",
+            storageBucket: "genz-qr.firebasestorage.app",
+            messagingSenderId: "44439219231",
+            appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
+        };
 
-            const facebookLink = "https://www.facebook.com/GenZInternetCafe";
-            const maxAttempts = 2;
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const qrRef = db.collection("qr").doc("genz");
 
-            const localKey = "qrScanAttempts";
-            let deviceAttempts = parseInt(localStorage.getItem(localKey)) || 0;
+        const facebookLink = "https://www.facebook.com/GenZInternetCafe";
+        const maxScans = 2;
 
-            if (deviceAttempts >= maxAttempts) {
-                document.getElementById("message").innerText =
-                    "❌ QR Code blocked! You have exceeded the maximum attempts on this device.";
-            } else {
-                deviceAttempts++;
-                localStorage.setItem(localKey, deviceAttempts);
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                qrRef.get().then(doc => {
+                    if (!doc.exists) {
+                        document.getElementById("message").innerText = "❌ QR not found in database.";
+                        return;
+                    }
 
-                const attemptsLeft = maxAttempts - deviceAttempts;
-                let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
-                if (attemptsLeft === 0) {
-                    msg = "✅ QR Code valid! This was your last attempt. Redirecting...";
-                }
+                    const scanCount = doc.data().scanCount || 0;
 
-                document.getElementById("message").innerText = msg;
+                    if (scanCount >= maxScans) {
+                        document.getElementById("message").innerText =
+                            "❌ QR Code blocked! Maximum attempts reached.";
+                    } else {
+                        qrRef.update({ scanCount: scanCount + 1 }).then(() => {
+                            const attemptsLeft = maxScans - (scanCount + 1);
+                            let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
+                            if (attemptsLeft === 0) {
+                                msg = "✅ QR Code valid! This was the last attempt. Redirecting...";
+                            }
 
-                setTimeout(() => {
-                    window.location.href = facebookLink;
-                }, 2000);
-            }
+                            document.getElementById("message").innerText = msg;
 
-        }, 800); // keeps "Checking QR Code..." visible
-    });
-    </script>
-
-    <!-- 🔒 ORIGINAL FIREBASE QR CHECK (UNCHANGED) -->
-    <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
-      authDomain: "genz-qr.firebaseapp.com",
-      projectId: "genz-qr",
-      storageBucket: "genz-qr.firebasestorage.app",
-      messagingSenderId: "44439219231",
-      appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const qrRef = db.collection("qr").doc("genz");
-    const facebookLink = "https://www.facebook.com/GenZInternetCafe";
-    const maxScans = 2;
-
-    qrRef.get().then(doc => {
-        if (!doc.exists) {
-            document.getElementById("message").innerText = "❌ QR not found in database.";
-            return;
-        }
-
-        const scanCount = doc.data().scanCount || 0;
-
-        if (scanCount >= maxScans) {
-            document.getElementById("message").innerText =
-                "❌ QR Code blocked! Maximum attempts reached.";
-        } else {
-            qrRef.update({ scanCount: scanCount + 1 }).then(() => {
-                const attemptsLeft = maxScans - (scanCount + 1);
-                let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
-                if (attemptsLeft === 0) {
-                    msg = "✅ QR Code valid! This was the last attempt. Redirecting...";
-                }
-
-                document.getElementById("message").innerText = msg;
-
-                setTimeout(() => {
-                    window.location.href = facebookLink;
-                }, 2000);
-            });
-        }
-    }).catch(() => {
-        document.getElementById("message").innerText =
-            "❌ Error connecting to database.";
-    });
+                            setTimeout(() => {
+                                window.location.href = facebookLink;
+                            }, 2000);
+                        });
+                    }
+                }).catch(() => {
+                    document.getElementById("message").innerText =
+                        "❌ Error connecting to database.";
+                });
+            }, 800);
+        });
     </script>
 
     <!-- Footer -->
     <footer id="footer">© 2026 Gen - Z Internet Cafe. All Rights Reserved.</footer>
 
     <script>
-    const footer = document.getElementById('footer');
-    const messages = [
-        "© 2026 Gen - Z Internet Cafe. All Rights Reserved.",
-        `<span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Call Us :</span>
-         <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">+907-014-2659  |</span> 
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">ZIP :</span>
-         <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">6128</span><br>
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Address :</span>
-         <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">
-         Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.
-         </span>`
-    ];
-    let current = 0;
+        const footer = document.getElementById('footer');
+        const messages = [
+            "© 2026 Gen - Z Internet Cafe. All Rights Reserved.",
+            `<span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Call Us :</span>
+             <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">+907-014-2659  |</span> 
+             <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">ZIP :</span>
+             <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">6128</span><br>
+             <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Address :</span>
+             <span style="font-family: 'Roboto Flex', sans-serif; font-style: italic;">
+             Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.
+             </span>`
+        ];
+        let current = 0;
 
-    function loopFooter() {
-        footer.style.opacity = 0;
-        setTimeout(() => {
-            current = (current + 1) % messages.length;
-            footer.innerHTML = messages[current];
-            footer.style.opacity = 1;
-        }, 1000);
-    }
+        function loopFooter() {
+            footer.style.opacity = 0;
+            setTimeout(() => {
+                current = (current + 1) % messages.length;
+                footer.innerHTML = messages[current];
+                footer.style.opacity = 1;
+            }, 1000);
+        }
 
-    setTimeout(() => footer.style.opacity = 1, 500);
-    setInterval(loopFooter, 5000);
+        setTimeout(() => footer.style.opacity = 1, 500);
+        setInterval(loopFooter, 5000);
     </script>
 
 </body>
