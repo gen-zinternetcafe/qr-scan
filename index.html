@@ -2,35 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> QR Scan</title>
+    <title>QR Scan</title>
 
-    <!-- Link external CSS -->
+    <!-- External CSS -->
     <link rel="stylesheet" href="style.css">
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <!-- Add Google Fonts in <head> -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Roboto+Flex:ital,wght@1,300&display=swap" rel="stylesheet">
 
     <style>
-    /* Footer style */
-    footer {
-        position: fixed;
-        bottom: 10px;
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        color: #555;
-        opacity: 0; /* start hidden for fade-in */
-        transition: opacity 1s ease-in-out;
-    }
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
 
-    /* Optional: body styling */
-    body {
-        font-family: Arial, sans-serif;
-    }
+        body {
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -38,95 +36,103 @@
     <!-- Logo -->
     <div class="logo-container"></div>
 
-    <!-- ✅ KEEP THIS LINE INTACT -->
+    <!-- MESSAGE (DO NOT REMOVE) -->
     <h2 id="message">Checking QR Code...</h2>
 
+    <!-- ================= QR LOGIC ================= -->
     <script>
-    // ===== Firebase Config =====
-    const firebaseConfig = {
-      apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
-      authDomain: "genz-qr.firebaseapp.com",
-      projectId: "genz-qr",
-      storageBucket: "genz-qr.firebasestorage.app",
-      messagingSenderId: "44439219231",
-      appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
-    };
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
+            authDomain: "genz-qr.firebaseapp.com",
+            projectId: "genz-qr",
+            storageBucket: "genz-qr.firebasestorage.app",
+            messagingSenderId: "44439219231",
+            appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
+        };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    const qrRef = db.collection("qr").doc("genz");
-    const facebookLink = "https://www.facebook.com/GenZInternetCafe";
-    const maxScans = 2; // Max allowed per device
+        const qrRef = db.collection("qr").doc("genz");
+        const facebookLink = "https://www.facebook.com/GenZInternetCafe";
 
-    // Use localStorage to track device attempts
-    const localKey = "qrScanAttempts";
-    let deviceAttempts = parseInt(localStorage.getItem(localKey)) || 0;
+        const MAX_SCANS = 2; // TOTAL scans for ALL devices
 
-    if (deviceAttempts >= maxScans) {
-        document.getElementById("message").innerText =
-            "❌ QR Code blocked! Maximum attempts reached on this device.";
-    } else {
-        // Update global scan count in Firebase (optional)
         qrRef.get().then(doc => {
             if (!doc.exists) {
-                document.getElementById("message").innerText = "❌ QR not found in database.";
+                document.getElementById("message").innerText =
+                    "❌ QR not found in database.";
                 return;
             }
 
             const data = doc.data();
-            const globalScanCount = data.scanCount || 0;
+            const scanCount = data.scanCount || 0;
 
-            qrRef.update({ scanCount: globalScanCount + 1 })
-                .catch(err => console.error("Error updating global count:", err));
-        }).catch(err => console.error("Error reading QR document:", err));
+            // BLOCK if already reached limit
+            if (scanCount >= MAX_SCANS) {
+                document.getElementById("message").innerText =
+                    "❌ QR Code BLOCKED. Maximum scans reached.";
+                return;
+            }
 
-        // Increment device attempts
-        deviceAttempts++;
-        localStorage.setItem(localKey, deviceAttempts);
+            // Allow scan
+            const newCount = scanCount + 1;
 
-        const attemptsLeft = maxScans - deviceAttempts;
-        let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
-        if (attemptsLeft === 0) msg = "✅ QR Code valid! This was the last attempt. Redirecting...";
+            qrRef.update({ scanCount: newCount }).then(() => {
+                const remaining = MAX_SCANS - newCount;
 
-        document.getElementById("message").innerText = msg;
+                let text = `✅ QR Code valid! ${remaining} scan(s) left. Redirecting...`;
+                if (remaining === 0) {
+                    text = "✅ QR Code valid! LAST scan. QR is now BLOCKED.";
+                }
 
-        setTimeout(() => {
-            window.location.href = facebookLink;
-        }, 2000);
-    }
+                document.getElementById("message").innerText = text;
+
+                setTimeout(() => {
+                    window.location.href = facebookLink;
+                }, 2000);
+            });
+
+        }).catch(err => {
+            console.error(err);
+            document.getElementById("message").innerText =
+                "❌ Database error. Try again later.";
+        });
     </script>
 
     <!-- Footer -->
     <footer id="footer">© 2026 Gen - Z Internet Cafe. All Rights Reserved.</footer>
 
+    <!-- Footer Animation -->
     <script>
-    // ===== Footer Text Loop =====
-    const footer = document.getElementById('footer');
-    const messages = [
-        "© 2026 Gen - Z Internet Cafe. All Rights Reserved.",
-        `<span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Call Us :</span> 
-         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">+907-014-2659  |</span> 
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">ZIP :</span> 
-         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">6128</span><br>
-         <span style="font-family: 'Montserrat', sans-serif; font-weight: 800;">Address :</span> 
-         <span style="font-family: 'Roboto Flex', sans-serif; font-weight: 300; font-style: italic;">
-         Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.</span>`
-    ];
-    let current = 0;
+        const footer = document.getElementById('footer');
+        const messages = [
+            "© 2026 Gen - Z Internet Cafe. All Rights Reserved.",
+            `<span style="font-family:'Montserrat';font-weight:800;">Call Us :</span>
+             <span style="font-family:'Roboto Flex';font-style:italic;">+907-014-2659 |</span>
+             <span style="font-family:'Montserrat';font-weight:800;"> ZIP :</span>
+             <span style="font-family:'Roboto Flex';font-style:italic;">6128</span><br>
+             <span style="font-family:'Montserrat';font-weight:800;">Address :</span>
+             <span style="font-family:'Roboto Flex';font-style:italic;">
+             Rizal st. cor. Millan st. 2nd flr. Max Fuel Gasoline Station Bldg. Isabela Neg. Occ.
+             </span>`
+        ];
 
-    function loopFooter() {
-        footer.style.opacity = 0;
-        setTimeout(() => {
-            current = (current + 1) % messages.length;
-            footer.innerHTML = messages[current];
-            footer.style.opacity = 1;
-        }, 1000);
-    }
+        let index = 0;
 
-    setTimeout(() => footer.style.opacity = 1, 500);
-    setInterval(loopFooter, 5000);
+        function loopFooter() {
+            footer.style.opacity = 0;
+            setTimeout(() => {
+                index = (index + 1) % messages.length;
+                footer.innerHTML = messages[index];
+                footer.style.opacity = 1;
+            }, 1000);
+        }
+
+        setTimeout(() => footer.style.opacity = 1, 500);
+        setInterval(loopFooter, 5000);
     </script>
+
 </body>
 </html>
