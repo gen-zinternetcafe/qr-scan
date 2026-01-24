@@ -1,5 +1,5 @@
 /* ============================
-   Reset & Full Page Setup
+   RESET & FULL PAGE SETUP
 ============================ */
 html, body {
     width: 100%;
@@ -10,7 +10,7 @@ html, body {
 }
 
 /* ============================
-   BODY BACKGROUND (SINGLE IMAGE)
+   BODY BACKGROUND (FULL SCREEN)
 ============================ */
 body {
     display: flex;
@@ -20,39 +20,32 @@ body {
     text-align: center;
     color: #ffffff;
 
-    /* ✅ SINGLE HD BACKGROUND ONLY */
-    background-image: url("backstylegenz.jpg");
-
+    background-image: url("https://scontent.fceb2-1.fna.fbcdn.net/v/t39.30808-6/617562205_857273213604779_8754628400472717553_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGiU8lEKMswhv1eLNAePo997wnn_zQB_VbvCef_NAH9VqTj12sZUfym_byVP2invE30j19DxEv4QHGmULVjNkmr&_nc_ohc=NEFiP1JMsSsQ7kNvwGMslrm&_nc_oc=AdlgsDrQGMDt9BJ-L1pN2nzJ335nWA_2-BuugQtzos1uBrtSL2rUTLQpHqwR30nuB8B0bHPeaVMgjx1m3I-4eNr2&_nc_zt=23&_nc_ht=scontent.fceb2-1.fna&_nc_gid=DEWQY0V74tXlZ9R6WN68TA&oh=00_AfoVD1zlBMlvOcLwysGMPWakSYI9q1dBrQMC44Y3Yi5XSA&oe=697A12B2");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
-
     background-color: #000;
     position: relative;
     overflow: hidden;
 }
 
 /* ============================
-   LOGO (TOP CENTER, SLOW SLIGHT GLITCH)
+   LOGO (FIXED SIZE, CENTER, GLITCH)
 ============================ */
 .logo-container {
     position: absolute;
-    top: -5px;              /* moved down 20px from -50px */
+    top: -5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 25%;              /* current logo size */
+    width: 25%;          /* fixed size, same as your original */
     aspect-ratio: 1 / 1;
     background-image: url('genzinternetcafe.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     z-index: 1000;
-
-    /* slower, subtle glitch */
     animation: glitchMove 4s infinite linear;
 }
-
-
 
 /* Pseudo-elements for RGB glitch */
 .logo-container::before,
@@ -70,87 +63,78 @@ body {
     z-index: -1;
 }
 
-/* Red channel */
 .logo-container::before {
-    animation: glitchRed 4s infinite linear; /* slower */
-    filter: drop-shadow(-1px 0 red); /* slight offset */
+    animation: glitchRed 4s infinite linear;
+    filter: drop-shadow(-1px 0 red);
 }
 
-/* Blue channel */
 .logo-container::after {
-    animation: glitchBlue 4s infinite linear; /* slower */
-    filter: drop-shadow(1px 0 rgb(0, 179, 255)); /* slight offset */
+    animation: glitchBlue 4s infinite linear;
+    filter: drop-shadow(1px 0 rgb(0, 179, 255));
 }
 
 /* ============================
-   GLITCH KEYFRAMES (slight movement)
-============================ */
-@keyframes glitchMove {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    25% { transform: translateX(-50%) translateY(-1px); }
-    50% { transform: translateX(-50%) translateY(1px); }
-    75% { transform: translateX(-50%) translateY(-1px); }
-}
-
-@keyframes glitchRed {
-    0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
-    20% { clip-path: inset(5% 0 85% 0); transform: translate(-1px, -1px); }
-    40% { clip-path: inset(10% 0 70% 0); transform: translate(1px, 1px); }
-    60% { clip-path: inset(5% 0 80% 0); transform: translate(-1px, 0); }
-    80% { clip-path: inset(10% 0 60% 0); transform: translate(1px, -1px); }
-}
-
-@keyframes glitchBlue {
-    0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0, 0); }
-    20% { clip-path: inset(5% 0 80% 0); transform: translate(1px, 1px); }
-    40% { clip-path: inset(10% 0 60% 0); transform: translate(-1px, -1px); }
-    60% { clip-path: inset(5% 0 70% 0); transform: translate(0, 1px); }
-    80% { clip-path: inset(10% 0 50% 0); transform: translate(-1px, -1px); }
-}
-
-
-
-
-
-/* ============================
-   Message Box / Card
+   MESSAGE BOX / CARD (RESPONSIVE)
 ============================ */
 #message {
     position: relative;
     z-index: 1;
-    font-size: 26px;
-    padding: 30px 60px;
+    font-size: 2vw;            /* responsive font size */
+    max-font-size: 26px;
+    padding: 2vw 4vw;          /* responsive padding */
     max-width: 90%;
 
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    border-radius: 2vw;
     border: 1px solid rgba(255, 255, 255, 0.25);
 
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
 
     animation: float 6s ease-in-out infinite;
 }
 
 /* ============================
-   Responsive (Mobile)
+   FLOATING ANIMATION
 ============================ */
-@media (max-width: 600px) {
-    #message {
-        font-size: 18px;
-        padding: 16px 30px;
-    }
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-0.5vw); }
 }
 
 /* ============================
-   Animation
+   LOGO GLITCH ANIMATIONS
 ============================ */
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-5px);
-    }
+@keyframes glitchMove {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    25% { transform: translateX(-50%) translateY(-0.2vw); }
+    50% { transform: translateX(-50%) translateY(0.2vw); }
+    75% { transform: translateX(-50%) translateY(-0.2vw); }
 }
 
+@keyframes glitchRed {
+    0%, 100% { clip-path: inset(0); transform: translate(0,0); }
+    20% { clip-path: inset(5% 0 85% 0); transform: translate(-0.1vw,-0.1vw); }
+    40% { clip-path: inset(10% 0 70% 0); transform: translate(0.1vw,0.1vw); }
+    60% { clip-path: inset(5% 0 80% 0); transform: translate(-0.1vw,0); }
+    80% { clip-path: inset(10% 0 60% 0); transform: translate(0.1vw,-0.1vw); }
+}
+
+@keyframes glitchBlue {
+    0%, 100% { clip-path: inset(0); transform: translate(0,0); }
+    20% { clip-path: inset(5% 0 80% 0); transform: translate(0.1vw,0.1vw); }
+    40% { clip-path: inset(10% 0 60% 0); transform: translate(-0.1vw,-0.1vw); }
+    60% { clip-path: inset(5% 0 70% 0); transform: translate(0,0.1vw); }
+    80% { clip-path: inset(10% 0 50% 0); transform: translate(-0.1vw,-0.1vw); }
+}
+
+/* ============================
+   MEDIA QUERIES (RESPONSIVE MESSAGE BOX)
+============================ */
+@media (max-width: 768px) {
+    #message { font-size: 4vw; padding: 4vw 6vw; }
+}
+
+@media (max-width: 480px) {
+    #message { font-size: 5vw; padding: 5vw 8vw; }
+}
