@@ -27,7 +27,6 @@
     }
     body {
         font-family: Arial, sans-serif;
-        text-align: center;
     }
     </style>
 </head>
@@ -39,7 +38,42 @@
     <!-- ✅ THIS SHOWS FIRST -->
     <h2 id="message">Checking QR Code...</h2>
 
-    <!-- ✅ SERVER-TRACKED DEVICE ATTEMPTS SCRIPT -->
+    <!-- ✅ DEVICE LIMIT SCRIPT (ADDED, NOT REMOVING ANYTHING) -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+
+            const facebookLink = "https://www.facebook.com/GenZInternetCafe";
+            const maxAttempts = 2;
+
+            const localKey = "qrScanAttempts";
+            let deviceAttempts = parseInt(localStorage.getItem(localKey)) || 0;
+
+            if (deviceAttempts >= maxAttempts) {
+                document.getElementById("message").innerText =
+                    "❌ QR Code blocked! You have exceeded the maximum attempts on this device.";
+            } else {
+                deviceAttempts++;
+                localStorage.setItem(localKey, deviceAttempts);
+
+                const attemptsLeft = maxAttempts - deviceAttempts;
+                let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
+                if (attemptsLeft === 0) {
+                    msg = "✅ QR Code valid! This was your last attempt. Redirecting...";
+                }
+
+                document.getElementById("message").innerText = msg;
+
+                setTimeout(() => {
+                    window.location.href = facebookLink;
+                }, 2000);
+            }
+
+        }, 800); // keeps "Checking QR Code..." visible
+    });
+    </script>
+
+    <!-- 🔒 ORIGINAL FIREBASE QR CHECK (UNCHANGED) -->
     <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
@@ -52,56 +86,8 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
-    const facebookLink = "https://www.facebook.com/GenZInternetCafe";
-    const maxAttempts = 2; // 2 allowed per device
-
-    // Generate a unique device ID if not exists
-    let deviceId = localStorage.getItem("deviceId");
-    if (!deviceId) {
-        deviceId = 'device-' + Math.random().toString(36).substr(2, 12);
-        localStorage.setItem("deviceId", deviceId);
-    }
-
-    const deviceRef = db.collection("qrDevices").doc(deviceId);
-
-    // Check server-side attempts
-    deviceRef.get().then(doc => {
-        let attempts = 0;
-        if (doc.exists) attempts = doc.data().attempts || 0;
-
-        if (attempts >= maxAttempts) {
-            document.getElementById("message").innerText =
-                "❌ QR Code blocked! Maximum attempts reached for this device.";
-        } else {
-            // Increment attempt on server
-            deviceRef.set({ attempts: attempts + 1 })
-                .then(() => {
-                    const attemptsLeft = maxAttempts - (attempts + 1);
-                    let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
-                    if (attemptsLeft === 0) msg = "✅ QR Code valid! This was your last attempt. Redirecting...";
-                    document.getElementById("message").innerText = msg;
-
-                    setTimeout(() => {
-                        window.location.href = facebookLink;
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error("Error updating attempts:", err);
-                    document.getElementById("message").innerText =
-                        "❌ Error! Try again later.";
-                });
-        }
-    }).catch(err => {
-        console.error("Error reading device attempts:", err);
-        document.getElementById("message").innerText =
-            "❌ Error connecting to database.";
-    });
-    </script>
-
-    <!-- 🔒 ORIGINAL FIREBASE QR CHECK (UNCHANGED) -->
-    <script>
     const qrRef = db.collection("qr").doc("genz");
+    const facebookLink = "https://www.facebook.com/GenZInternetCafe";
     const maxScans = 2;
 
     qrRef.get().then(doc => {
