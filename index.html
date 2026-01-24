@@ -61,38 +61,54 @@
 
     <!-- Firebase Configuration & QR Scan Logic -->
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
-            authDomain: "genz-qr.firebaseapp.com",
-            projectId: "genz-qr",
-            storageBucket: "genz-qr.firebasestorage.app",
-            messagingSenderId: "44439219231",
-            appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
+        authDomain: "genz-qr.firebaseapp.com",
+        projectId: "genz-qr",
+        storageBucket: "genz-qr.firebasestorage.app",
+        messagingSenderId: "44439219231",
+        appId: "1:44439219231:web:bc89320fe9492a02b9b92a"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const qrRef = db.collection("qr").doc("genz");
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const qrRef = db.collection("qr").doc("genz");
 
-        const facebookLink = "https://www.facebook.com/GenZInternetCafe";
-        const maxScans = 2;
+    const facebookLink = "https://www.facebook.com/GenZInternetCafe";
+    const maxAttempts = 2;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                qrRef.get().then(doc => {
-                    if (!doc.exists) {
-                        document.getElementById("message").innerText = "❌ QR not found in database.";
-                        return;
-                    }
+    // Generate a unique device ID if none exists
+    let deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) {
+        deviceId = 'device-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+        localStorage.setItem("deviceId", deviceId);
+    }
 
-                    const scanCount = doc.data().scanCount || 0;
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+            // Check if Firestore document exists
+            qrRef.get().then(doc => {
+                if (!doc.exists) {
+                    // Create document if it doesn't exist
+                    qrRef.set({ devices: {} });
+                    document.getElementById("message").innerText = "Initializing QR system, please scan again.";
+                    return;
+                }
 
-                    if (scanCount >= maxScans) {
-                        document.getElementById("message").innerText =
-                            "❌ QR Code blocked! Maximum attempts reached.";
-                    } else {
-                        qrRef.update({ scanCount: scanCount + 1 }).then(() => {
-                            const attemptsLeft = maxScans - (scanCount + 1);
+                const devices = doc.data().devices || {};
+                const deviceAttempts = devices[deviceId] || 0;
+
+                if (deviceAttempts >= maxAttempts) {
+                    // Block device
+                    document.getElementById("message").innerText =
+                        "❌ QR Code blocked! Maximum attempts reached for this device.";
+                } else {
+                    // Increment attempts for this device
+                    devices[deviceId] = deviceAttempts + 1;
+
+                    qrRef.update({ devices })
+                        .then(() => {
+                            const attemptsLeft = maxAttempts - devices[deviceId];
                             let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
                             if (attemptsLeft === 0) {
                                 msg = "✅ QR Code valid! This was the last attempt. Redirecting...";
@@ -100,18 +116,24 @@
 
                             document.getElementById("message").innerText = msg;
 
+                            // Redirect to Facebook after 2 seconds
                             setTimeout(() => {
                                 window.location.href = facebookLink;
                             }, 2000);
+                        })
+                        .catch(() => {
+                            document.getElementById("message").innerText =
+                                "❌ Error updating attempts in database.";
                         });
-                    }
-                }).catch(() => {
-                    document.getElementById("message").innerText =
-                        "❌ Error connecting to database.";
-                });
-            }, 800);
-        });
-    </script>
+                }
+            }).catch(() => {
+                document.getElementById("message").innerText =
+                    "❌ Error connecting to database.";
+            });
+        }, 800);
+    });
+</script>
+
 
     <!-- Footer -->
     <footer id="footer">© 2026 Gen - Z Internet Cafe. All Rights Reserved.</footer>
