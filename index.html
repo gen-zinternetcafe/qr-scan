@@ -30,7 +30,6 @@
             opacity: 0;
             transition: opacity 1s ease-in-out;
         }
-        #adminPanel { display:none; margin-top:20px; }
     </style>
 </head>
 <body>
@@ -43,7 +42,11 @@
 
     <script>
         const bgMusic = document.getElementById('bgMusic');
+
+        // Attempt to play audio programmatically
         bgMusic.play().catch(() => console.log('Autoplay blocked, waiting for interaction.'));
+
+        // Listen for first user interaction to unmute
         document.addEventListener('click', () => {
             bgMusic.muted = false;
             bgMusic.play();
@@ -56,18 +59,7 @@
     <!-- Message -->
     <h2 id="message">Checking QR Code...</h2>
 
-    <!-- Admin Panel -->
-    <hr>
-    <h3 onclick="toggleAdmin()" style="cursor:pointer;">🔒 Admin Panel</h3>
-    <div id="adminPanel">
-        <input type="password" id="adminPass" placeholder="Admin password">
-        <button onclick="loadAdmin()">Enter</button>
-
-        <h3>📋 Facebook Scan List</h3>
-        <ul id="fbList"></ul>
-    </div>
-
-    <!-- Firebase & QR Scan -->
+    <!-- Firebase Configuration & QR Scan Logic -->
     <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAfNFpDjhB1y4-wOpU6V7vHEw2HKOlSNKw",
@@ -85,6 +77,7 @@
     const facebookLink = "https://www.facebook.com/GenZInternetCafe";
     const maxAttempts = 2;
 
+    // Generate a unique device ID if none exists
     let deviceId = localStorage.getItem("deviceId");
     if (!deviceId) {
         deviceId = 'device-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
@@ -93,8 +86,10 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
+            // Check if Firestore document exists
             qrRef.get().then(doc => {
                 if (!doc.exists) {
+                    // Create document if it doesn't exist
                     qrRef.set({ devices: {} });
                     document.getElementById("message").innerText = "Initializing QR system, please scan again.";
                     return;
@@ -104,27 +99,32 @@
                 const deviceAttempts = devices[deviceId] || 0;
 
                 if (deviceAttempts >= maxAttempts) {
+                    // Block device
                     document.getElementById("message").innerText =
                         "❌ QR Code blocked! Maximum attempts reached for this device.";
                 } else {
+                    // Increment attempts for this device
                     devices[deviceId] = deviceAttempts + 1;
 
-                    qrRef.update({ devices }).then(() => {
-                        const attemptsLeft = maxAttempts - devices[deviceId];
-                        let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Please login with Facebook.`;
-                        if (attemptsLeft === 0) {
-                            msg = "✅ QR Code valid! This was the last attempt. Please login with Facebook.";
-                        }
-                        document.getElementById("message").innerText = msg;
-                        // Show FB login button after QR check
-                        const fbBtn = document.createElement("button");
-                        fbBtn.innerText = "Login with Facebook";
-                        fbBtn.onclick = fbLogin;
-                        document.body.appendChild(fbBtn);
-                    }).catch(() => {
-                        document.getElementById("message").innerText =
-                            "❌ Error updating attempts in database.";
-                    });
+                    qrRef.update({ devices })
+                        .then(() => {
+                            const attemptsLeft = maxAttempts - devices[deviceId];
+                            let msg = `✅ QR Code valid! You have ${attemptsLeft} attempt(s) left. Redirecting...`;
+                            if (attemptsLeft === 0) {
+                                msg = "✅ QR Code valid! This was the last attempt. Redirecting...";
+                            }
+
+                            document.getElementById("message").innerText = msg;
+
+                            // Redirect to Facebook after 2 seconds
+                            setTimeout(() => {
+                                window.location.href = facebookLink;
+                            }, 2000);
+                        })
+                        .catch(() => {
+                            document.getElementById("message").innerText =
+                                "❌ Error updating attempts in database.";
+                        });
                 }
             }).catch(() => {
                 document.getElementById("message").innerText =
@@ -132,70 +132,8 @@
             });
         }, 800);
     });
-    </script>
+</script>
 
-    <!-- Facebook SDK & Login -->
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" 
-        src="https://connect.facebook.net/en_US/sdk.js"></script>
-
-    <script>
-    window.fbAsyncInit = function() {
-        FB.init({
-            appId      : '2098441464232439', // ← Your App ID
-            cookie     : true,
-            xfbml      : true,
-            version    : 'v17.0'
-        });
-        FB.AppEvents.logPageView();   
-    };
-
-    function fbLogin() {
-        FB.login(function(response) {
-            if (response.authResponse) {
-                FB.api('/me', {fields: 'name,id,email'}, function(resp) {
-                    console.log('Hello, ' + resp.name);
-                    alert('Hello, ' + resp.name + '!');
-
-                    const userRef = db.collection("facebook_users").doc(resp.id);
-                    userRef.set({
-                        name: resp.name,
-                        email: resp.email || '',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => {
-                        console.log('Saved to Firestore!');
-                        window.location.href = "https://www.facebook.com/GenZInternetCafe";
-                    });
-                });
-            } else {
-                console.log('User cancelled login or did not fully authorize.');
-            }
-        }, {scope: 'public_profile,email'});
-    }
-
-    // Admin Panel functions
-    function toggleAdmin() {
-        const panel = document.getElementById('adminPanel');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function loadAdmin() {
-        const pass = document.getElementById('adminPass').value;
-        if(pass === "admin123") { // set your admin password
-            const list = document.getElementById('fbList');
-            db.collection("facebook_users").get().then(snapshot => {
-                list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const li = document.createElement('li');
-                    li.innerText = doc.data().name;
-                    list.appendChild(li);
-                });
-            });
-        } else {
-            alert('Wrong password!');
-        }
-    }
-    </script>
 
     <!-- Footer -->
     <footer id="footer">© 2026 Gen - Z Internet Cafe. All Rights Reserved.</footer>
@@ -214,6 +152,7 @@
              </span>`
         ];
         let current = 0;
+
         function loopFooter() {
             footer.style.opacity = 0;
             setTimeout(() => {
@@ -222,6 +161,7 @@
                 footer.style.opacity = 1;
             }, 1000);
         }
+
         setTimeout(() => footer.style.opacity = 1, 500);
         setInterval(loopFooter, 5000);
     </script>
