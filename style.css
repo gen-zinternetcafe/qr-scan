@@ -20,7 +20,7 @@ body {
     text-align: center;
     color: #ffffff;
 
-    background-image: url("https://scontent.fceb2-2.fna.fbcdn.net/v/t39.30808-6/639237450_880286857970081_4152778216152349876_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeFsfYKa09SSRO6PBMDg09rGyTP_PKdEKX7JM_88p0QpftryOfm23P2uiq2-TyN5F0jHM5aiAG6sPasXHZ0Xig4w&_nc_ohc=CYLZRW3-G2MQ7kNvwHrM0g0&_nc_oc=AdkHHX6VJ_T9oa8G-SjARxbfJ1muktNuWXJNjpsMrcWg2etDzQ6iI7zIoqFhO6hQUylqHra_5IqrEBfFFnpcrbsc&_nc_zt=23&_nc_ht=scontent.fceb2-2.fna&_nc_gid=qwUqhu48y6_I7XcNUWH68A&oh=00_Afss-UvEa6qe24AIrhN1clhaQnAiQLBUqtzWFpiTc_OZCw&oe=699F2153");
+    background-image: url("backstylegenz");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
@@ -138,3 +138,4 @@ body {
 @media (max-width: 480px) {
     #message { font-size: 5vw; padding: 5vw 8vw; }
 }
+
